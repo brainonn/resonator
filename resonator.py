@@ -47,9 +47,9 @@ class Resonator:
         return self.r(f) + 1j * self.x(f)
     
     def g(self, f):
-        return self.r(f) / np.abs(self.impedance(f))
+        return self.r(f) / np.abs(self.impedance(f)) ** 2
     def b(self, f):
-        return - self.x(f) / np.abs(self.impedance(f))
+        return - self.x(f) / np.abs(self.impedance(f)) ** 2
     def admittance(self, f):
         return 1 / self.impedance(f)
 
