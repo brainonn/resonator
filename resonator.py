@@ -142,6 +142,7 @@ class Resonator:
         return self.r(f) + 1j * self.x(f)
     
     def g(self, f):
+
         """
         
 
@@ -175,6 +176,7 @@ class Resonator:
         """
         return - self.x(f) / np.abs(self.impedance(f))**2
     
+
     def admittance(self, f):
         """
         
