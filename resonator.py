@@ -32,7 +32,7 @@ class Resonator:
         
         self.fs = fs
         self.fp = fp
-        self.m = m if m is not None else (fp ** 2 - fs ** 2) / fs ** 2
+        self.m = m if m is not None else (fp ** 2 - fs ** 2) / fp ** 2
         self.Q = Q
         self.C0 = C0
     
@@ -157,7 +157,7 @@ class Resonator:
             Conductance.
 
         """
-        return self.r(f) / np.abs(self.impedance(f))**2
+        return self.r(f) / np.abs(self.impedance(f)) ** 2
     
     def b(self, f):
         """
@@ -174,7 +174,7 @@ class Resonator:
 
 
         """
-        return - self.x(f) / np.abs(self.impedance(f))**2
+        return - self.x(f) / np.abs(self.impedance(f)) ** 2
     
 
     def admittance(self, f):
@@ -216,3 +216,5 @@ if __name__ == '__main__':
     plt.plot(freqs, r.g(freqs))
     plt.axvline(fs, color='red')
     plt.axvline(fp, color='black')
+    plt.show()
+    print(r.m * r.Q)
