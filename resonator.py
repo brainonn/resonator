@@ -7,6 +7,7 @@ This is a temporary script file.
 
 from matplotlib import pyplot as plt
 import numpy as np
+from scipy.optimize import root_scalar
 
 class Resonator:
     def __init__(self, fs, fp, Q, C0, m=None):
@@ -209,10 +210,33 @@ if __name__ == '__main__':
     fp = 1055721
     Q = 16251.907728114395
     C0 = 7.60393485503531e-12
-    C1 = 36e-12
-    C2 = 36e-12
+    C1 = 160e-12 #at amplifier output
+    C2 = 36e-12 #at amplifier input
+    Ro = 1e3
+    g = 25e-3
     r = Resonator(fs, fp, Q, C0)
-    freqs = np.arange(0.999 * fs, 1.001 * fp) 
-    plt.plot(freqs, r.g(freqs))
-    plt.axvline(fs, color='red')
+    freqs = np.arange(0.999 * fs, 1.001 * fp)
+    
+    x1 = lambda f: x(C1, f)
+    x2 = lambda f: x(C2, f)
+
+    
+    G = lambda f: -g * Ro * A(f, C1, C2, g=-1) / (Ro + A(f, C1, C2, g=-1))
+    beta = lambda f: fbd(f, C1, C2)
+    d = lambda f: r.x(f) + (1 + r.r(f) / Ro) * x1(f) + x2(f)
+    
+    
+    fr2 = root_scalar(d, x0=fs, x1=fp)
+    
+    if fr2.converged:
+        print(fr2.root)
+    
+    Gb = lambda f: g * x1(f) * x2(f)\
+        / (r.r(f) - x1(f) / Ro * (r.x(f) + x2(f)) + 
+           1j * (r.x(f) + x1(f) + x2(f) + x1(f) * r.r(f) / Ro))
+    
+    plt.plot(freqs, np.angle(Gb(freqs)))
+
+    plt.axvline(fs, color='green')
+    plt.axvline(fr2.root, color='red')
     plt.axvline(fp, color='black')
