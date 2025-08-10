@@ -10,29 +10,33 @@ import numpy as np
 from scipy.optimize import root_scalar
 
 class Resonator:
-    def __init__(self, fs, fp, Q, C0, m=None):
+    def __init__(self, fs, Q, C0, fp=None, m=None):
         """
         Parameters
         ----------
         fs : float, Hz
-            Resonance frequency.
-        fp : float, Hz
-            Antiresonance frequency?
+            Series resonance frequency.
         Q : float
             Quality factor.
-        C0 : float, F?
-            Capacitance.
+        C0 : float, F
+            Static capacitance.
+        fp : float, Hz
+            Parallel resonance frequency. If None will be calcultaed from
+            capacitance ratio `m`. The default is None.
         m : float, optional
-            DESCRIPTION. The default is None.
+            Capacitance ratio. If None will be calculated from resonance
+            frequencies. The default is None.
 
         Returns
         -------
         None.
 
         """
-        
+        if fp is None and m is None:
+            raise ValueError('You should specify either paraller resonance'
+                             'frequency or capacitance ratio')
         self.fs = fs
-        self.fp = fp
+        self.fp = fp if fp is not None else fs * np.sqrt(1 + m)
         self.m = m if m is not None else (fp ** 2 - fs ** 2) / fs ** 2
         self.Q = Q
         self.C0 = C0
@@ -45,13 +49,13 @@ class Resonator:
         Parameters
         ----------
         R : float, Ohm
-            Resistance.
+            Equivalent resistance.
         L : float, H
-            Inductance.
+            Equivalent inductance.
         C : float, F
-            Crustal equivalent capacitance.
+            Dynamic capacitance.
         C0 : float, F
-            Capacitor capacitance.
+            Static capacitance.
 
         Returns
         -------
@@ -62,7 +66,7 @@ class Resonator:
         fs = 1 / (2 * np.pi * np.sqrt(L * C))
         fp = 1 / (2 * np.pi * np.sqrt(L * C * C0 / (C + C0)))
         Q = 1 / R * np.sqrt(L / C)
-        return cls(fs, fp, Q, C0)
+        return cls(fs, Q, C0, fp=fp)
     
     def phase(self, f):
         """
@@ -214,7 +218,7 @@ if __name__ == '__main__':
     C2 = 36e-12 #at amplifier input
     Ro = 1e3
     g = 25e-3
-    r = Resonator(fs, fp, Q, C0)
+    r = Resonator(fs, Q, C0, fp=fp)
     freqs = np.arange(0.999 * fs, 1.001 * fp)
     
     x1 = lambda f: x(C1, f)
